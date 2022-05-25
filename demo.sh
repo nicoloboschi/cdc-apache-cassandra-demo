@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-docker-compose up -d cassandra pulsar
+docker-compose up -d cassandra pulsar grafana kibana
 
 docker logs cassandra
 docker exec -it cassandra cqlsh -e "CREATE KEYSPACE ks1 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};"
@@ -37,18 +37,17 @@ docker exec -it cassandra cassandra-stress user profile=/table1.yaml no-warmup o
 docker exec -it pulsar bin/pulsar-admin topics stats persistent://public/default/events-ks1.table1
 docker exec -it pulsar bin/pulsar-admin topics stats persistent://public/default/data-ks1.table1
 
-docker exec -it pulsar bin/pulsar-client consume -st auto_consume -s from-cli persistent://public/default/data-ks1.table1
+docker exec -it pulsar bin/pulsar-client consume -st auto_consume -s from-cli -p Earliest persistent://public/default/data-ks1.table1
 
 docker exec -it cassandra cqlsh -e "SELECT * FROM ks1.table1;"
 
-docker-compose up -d grafana
-
-http://localhost:9090
-http://localhost:3000
-
+# Grafana
+open http://localhost:9090
+open http://localhost:3000
 
 
-docker-compose up -d kibana
+
+# Elastic
 http://localhost:5601
 
 docker exec -it pulsar bin/pulsar-admin sink create \
