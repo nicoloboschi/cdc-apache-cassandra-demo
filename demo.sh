@@ -32,7 +32,7 @@ docker exec -it pulsar cat /pulsar/logs/functions/public/default/cassandra-sourc
 
 docker exec -it cassandra cqlsh -e "INSERT INTO ks1.table1(a,b) VALUES('mykey','bvalue');"
 docker exec -it cassandra cqlsh -e "SELECT count(*) FROM ks1.table1;"
-docker exec -it cassandra cassandra-stress user profile=/table1.yaml no-warmup ops\(insert=1\) n=100000 -rate threads=10
+docker exec -it cassandra cassandra-stress user profile=/table1.yaml no-warmup ops\(insert=1\) n=10000 -rate threads=10
 
 docker exec -it pulsar bin/pulsar-admin topics stats persistent://public/default/events-ks1.table1
 docker exec -it pulsar bin/pulsar-admin topics stats persistent://public/default/data-ks1.table1
@@ -41,8 +41,9 @@ docker exec -it pulsar bin/pulsar-client consume -st auto_consume -s from-cli -p
 
 docker exec -it cassandra cqlsh -e "SELECT * FROM ks1.table1;"
 
-# Grafana
+# Prometheus
 open http://localhost:9090
+# Grafana
 open http://localhost:3000
 
 
@@ -68,3 +69,6 @@ docker exec -it pulsar bin/pulsar-admin sink create \
 docker exec -it pulsar bin/pulsar-admin sink status --name es-sink-ks1-table1
 docker exec -it pulsar cat /pulsar/logs/functions/public/default/es-sink-ks1-table1/es-sink-ks1-table1-0.log
 docker exec -it elasticsearch curl "http://localhost:9200/ks1.table1/_count?pretty"
+
+# Kibana
+open http://localhost:5601
