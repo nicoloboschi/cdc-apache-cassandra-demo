@@ -4,6 +4,9 @@ networks:
 
 services:
   cassandra:
+    build:
+      context: ./docker/cassandra
+      dockerfile: Dockerfile
     image: "cassandra-4-agent:latest"
     container_name: cassandra
     networks: [ "net1" ]
@@ -41,6 +44,17 @@ services:
       - '8080:8080'
       - '6650:6650'
     command: /bin/bash -c "bin/pulsar standalone -nss"
+  
+  pulsarmanager:
+    image: apachepulsar/pulsar-manager:v0.2.0
+    ports:
+      - "9527:9527"
+      - "7750:7750"
+    depends_on:
+      - pulsar
+    networks: [ "net1" ]
+    environment:
+      SPRING_CONFIGURATION_FILE: /pulsar-manager/pulsar-manager/application.properties
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.2

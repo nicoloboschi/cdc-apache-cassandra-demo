@@ -10,6 +10,19 @@ docker exec -it cassandra cqlsh -e "SELECT * FROM ks1.table1;"
 
 docker logs pulsar
 
+CSRF_TOKEN=$(curl http://localhost:7750/pulsar-manager/csrf-token)
+curl \
+    -H "X-XSRF-TOKEN: $CSRF_TOKEN" \
+    -H "Cookie: XSRF-TOKEN=$CSRF_TOKEN;" \
+    -H 'Content-Type: application/json' \
+    -X PUT http://localhost:7750/pulsar-manager/users/superuser \
+    -d '{"name": "admin", "password": "apachepulsar", "description": "test", "email": "username@test.org"}'
+
+# Pulsar Manager
+open http://localhost:9527
+# Service url: http://pulsar:8080
+
+
 docker exec -it pulsar bin/pulsar-admin source create \
     --source-type cassandra-source \
     --tenant public \
@@ -32,7 +45,7 @@ docker exec -it pulsar cat /pulsar/logs/functions/public/default/cassandra-sourc
 
 docker exec -it cassandra cqlsh -e "INSERT INTO ks1.table1(a,b) VALUES('mykey','bvalue');"
 docker exec -it cassandra cqlsh -e "SELECT count(*) FROM ks1.table1;"
-docker exec -it cassandra cassandra-stress user profile=/table1.yaml no-warmup ops\(insert=1\) n=10000 -rate threads=10
+docker exec -it cassandra cassandra-stress user profile=/table1.yaml no-warmup ops\(insert=1\) n=100 -rate threads=10
 
 docker exec -it pulsar bin/pulsar-admin topics stats persistent://public/default/events-ks1.table1
 docker exec -it pulsar bin/pulsar-admin topics stats persistent://public/default/data-ks1.table1
